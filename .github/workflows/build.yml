@@ -39,13 +39,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 修改点：从 crimera/piko 获取远程最新 Tag
-          TAG=$(gh release list -R crimera/piko -L 1 | awk -F '\t' '{print $3}')
-          if [ -z "$TAG" ]; then TAG="v0.0.1"; fi
+          # 核心修改：去掉 --exclude-pre-release (默认 gh 会列出所有)
+          # 使用 gh release list 获取第一个，无论它是正式版还是预发布版
+          TAG=$(gh release list -R crimera/piko --limit 1 | awk -F '\t' '{print $3}')
           
-          # 核心修改：不再做 +1 运算，直接使用 Tag 字符串
+          if [ -z "$TAG" ]; then TAG="v0.0.1-dev"; fi
+          
           echo "NEXT_VER_CODE=${TAG}" >> $GITHUB_OUTPUT
-          # Magisk 需要一个整数 versionCode，我们使用 GitHub 的运行次数确保递增
           echo "INT_VER_CODE=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
