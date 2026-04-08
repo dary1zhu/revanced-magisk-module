@@ -1,7 +1,8 @@
-name: CI
+name: Piko CI
 on:
   workflow_dispatch:
   schedule:
+    # 每天北京时间凌晨 0 点运行 (UTC 16:00)
     - cron: "0 16 * * *"
 
 jobs:
@@ -20,15 +21,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # 尝试切换到 update 分支获取上一次的构建记录
           if ! git checkout origin/update build.md; then
-            echo "first time building!"
+            echo "First time building Piko modules!"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
+            # 运行 build.sh 的配置更新模式。
+            # 因为你已经把 build.sh 里的默认源改成了 crimera/piko，
+            # 所以这里会自动对比 Piko 官方的最新版本。
             UPDATE_CFG=$(./build.sh config.toml --config-update)
             if [ "$UPDATE_CFG" ]; then
+              echo "New Piko version detected!"
               echo "'$UPDATE_CFG'"
               echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
             else
+              echo "No new version found in Piko upstream."
               echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
             fi
           fi
@@ -37,7 +44,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh run list -L400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$GITHUB_REPOSITORY/actions/runs/ID" -X DELETE || :
+          # 清理过期的 Workflow 运行记录，保持界面整洁
+          gh run list -L 400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$GITHUB_REPOSITORY/actions/runs/ID" -X DELETE || :
 
     outputs:
       SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
@@ -45,6 +53,10 @@ jobs:
   build:
     permissions: write-all
     needs: check
+    # 只有当 check 任务发现新版本时，才会调用 build.yml
+    uses: ./.github/workflows/build.yml
+    if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
+    secrets: inherit
     uses: ./.github/workflows/build.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
     secrets: inherit
