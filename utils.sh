@@ -8,7 +8,7 @@ BUILD_DIR="build"
 DL_SRCS=("direct" "archive" "apkmirror" "uptodown")
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
-NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
+NEXT_VER_CODE=${NEXT_VER_CODE:-latest}
 OS=$(uname -o)
 
 toml_prep() {
