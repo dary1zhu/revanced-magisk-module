@@ -1,4 +1,4 @@
-name: Build Modules
+name: Build Piko Modules
 on:
   workflow_call:
     inputs:
@@ -6,7 +6,6 @@ on:
         type: boolean
         required: false
         default: true
-
   workflow_dispatch:
 
 jobs:
@@ -40,9 +39,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=$(gh release list -L 1 | awk -F '\t' '{print $3}')
-          if [ -z "$TAG" ]; then TAG=0; fi
-          echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
+          # 修改点：从 crimera/piko 获取远程最新 Tag
+          TAG=$(gh release list -R crimera/piko -L 1 | awk -F '\t' '{print $3}')
+          if [ -z "$TAG" ]; then TAG="v0.0.1"; fi
+          
+          # 核心修改：不再做 +1 运算，直接使用 Tag 字符串
+          echo "NEXT_VER_CODE=${TAG}" >> $GITHUB_OUTPUT
+          # Magisk 需要一个整数 versionCode，我们使用 GitHub 的运行次数确保递增
+          echo "INT_VER_CODE=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
         run: if [ -f "config.json" ]; then ./build.sh config.json; else ./build.sh config.toml; fi
@@ -56,6 +60,8 @@ jobs:
         run: |
           DELIM="$(openssl rand -hex 8)"
           echo "BUILD_LOG<<${DELIM}" >> "$GITHUB_OUTPUT"
+          # 如果 build.md 没生成，创建一个空的防止后续报错
+          touch build.md
           cat build.md >> "$GITHUB_OUTPUT"
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
@@ -66,7 +72,7 @@ jobs:
           body: ${{ steps.get_output.outputs.BUILD_LOG }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./build/*
-          release_name: ReVanced
+          release_name: "Piko Builds"
           tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true
@@ -79,7 +85,7 @@ jobs:
           get_update_json() {
             echo "{
             \"version\": \"$1\",
-            \"versionCode\": ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }},
+            \"versionCode\": ${{ steps.next_ver_code.outputs.INT_VER_CODE }},
             \"zipUrl\": \"$2\",
             \"changelog\": \"https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md\"
           }"
@@ -97,7 +103,6 @@ jobs:
             get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
           done
           cd ..
-
           find . -name "*-update.json" | grep . || : >dummy-update.json
 
       - uses: stefanzweifel/git-auto-commit-action@v7
@@ -105,7 +110,7 @@ jobs:
           branch: update
           skip_checkout: true
           file_pattern: build.md *-update.json
-          commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          commit_message: "Sync Piko version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}"
 
       - name: Report to Telegram
         env:
@@ -113,24 +118,24 @@ jobs:
         if: env.TG_TOKEN != null
         run: |
           cd build || { echo "build folder not found"; exit 1; }
-
-          TG_CHAT="@rvc_magisk"
+          # 修改这里为你自己的 Telegram 频道
+          TG_CHAT="@your_piko_channel" 
           NL=$'\n'
           APKS=""
           MODULES=""
           for OUTPUT in *; do
             DL_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             if [[ $OUTPUT = *.apk ]]; then
-              APKS+="${NL}📦[${OUTPUT}](${DL_URL})"
+              APKS+="${NL}📦 [${OUTPUT}](${DL_URL})"
             elif [[ $OUTPUT = *.zip ]]; then
-              MODULES+="${NL}📦[${OUTPUT}](${DL_URL})"
+              MODULES+="${NL}📦 [${OUTPUT}](${DL_URL})"
             fi
           done
           MODULES=${MODULES#"$NL"}
           APKS=${APKS#"$NL"}
 
           BODY="$(sed 's/^\* \*\*/↪ \*\*/g; s/^\* `/↪ \*\*/g; s/`/\*/g; s/^\* /\↪/g; s/\*\*/\*/g; s/###//g; s/^- /↪ /g; /^==/d;' ../build.md)"
-          MSG="*New build!*
+          MSG="*New Piko Build!*
 
           ${BODY}
 
@@ -139,9 +144,4 @@ jobs:
           ${MODULES}
 
           APKs:
-          ${APKS}
-          "
-          echo "'$MSG'"
-          MSG=${MSG:0:9450}
-          POST="https://api.telegram.org/bot${TG_TOKEN}/sendMessage"
-          curl -X POST --data-urlencode "parse_mode=Markdown" --data-urlencode "disable_web_page_preview=true" --data-urlencode "text=${MSG}" --data-urlencode "chat_id=${TG_CHAT}" "$POST"
+          ${APKS}"
