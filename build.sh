@@ -1,11 +1,3 @@
-Gemini 说
-为了让 build.sh 脚本完美适配 Piko，我们需要修改脚本中的默认变量、品牌标识以及输出日志。
-
-这个脚本逻辑高度依赖于同目录下的 utils.sh。在修改完 build.sh 后，你可能还需要检查 utils.sh 中的文件匹配正则（因为 Piko 的文件名通常是 piko-patches-xxx.jar 而不是 revanced-patches-xxx.jar）。
-
-以下是修改后的 build.sh：
-
-🛠️ 修改后的 build.sh
 Bash
 #!/usr/bin/env bash
 
