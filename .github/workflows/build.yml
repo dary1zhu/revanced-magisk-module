@@ -46,6 +46,7 @@ jobs:
           if [ -z "$TAG" ]; then TAG="v0.0.1-dev"; fi
           
           echo "PIKO_TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "NEXT_VER_CODE=${TAG}" >> $GITHUB_OUTPUT
           echo "INT_VER_CODE=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
@@ -55,6 +56,7 @@ jobs:
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           PATCHES_VER: ${{ steps.next_ver_code.outputs.PIKO_TAG }}
           CLI_VER: latest
+          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.PIKO_TAG }}
 
       - name: Get output
         id: get_output
