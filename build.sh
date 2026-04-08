@@ -35,7 +35,7 @@ DEF_CLI_VER="${NEXT_VER_CODE:-$(toml_get "$main_config_t" cli-version)}" || DEF_
 
 # 修改为 Piko 的源
 DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="crimera/piko"
-DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="crimera/piko"
+DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="MorpheApp/morphe-cli"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="Piko"
 
 mkdir -p "$TEMP_DIR" "$BUILD_DIR"
