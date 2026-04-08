@@ -2,7 +2,10 @@
 
 set -e
 
+# 颜色输出函数
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
+
+# 交互询问函数
 ask() {
 	local y
 	for ((n = 0; n < 3; n++)); do
@@ -19,69 +22,83 @@ ask() {
 	return 1
 }
 
-pr "Ask for storage permission"
+pr "获取存储权限..."
 until
 	yes | termux-setup-storage >/dev/null 2>&1
 	ls /sdcard >/dev/null 2>&1
 do sleep 1; done
-if [ ! -f ~/.rvmm_"$(date '+%Y%m')" ]; then
-	pr "Setting up environment..."
-	yes "" | pkg update -y && pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" && pkg install -y git curl jq openjdk-17 zip
-	: >~/.rvmm_"$(date '+%Y%m')"
-fi
-mkdir -p /sdcard/Download/revanced-magisk-module/
 
-if [ -d revanced-magisk-module ] || [ -f config.toml ]; then
-	if [ -d revanced-magisk-module ]; then cd revanced-magisk-module; fi
-	pr "Checking for revanced-magisk-module updates"
+# 环境初始化 (每月检查一次)
+if [ ! -f ~/.piko_"$(date '+%Y%m')" ]; then
+	pr "正在安装构建环境 (Java, Git, Curl, JQ...)"
+	yes "" | pkg update -y && pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" && pkg install -y git curl jq openjdk-17 zip
+	: >~/.piko_"$(date '+%Y%m')"
+fi
+
+# 创建下载目录
+mkdir -p /sdcard/Download/piko-magisk-module/
+
+# --- 核心修改：仓库地址 ---
+# 请将下面的 URL 换成你自己修改后的那个仓库地址
+REPO_URL="https://github.com/dary1zhu/revanced-magisk-module"
+LOCAL_DIR="revanced-magisk-module"
+
+if [ -d "$LOCAL_DIR" ] || [ -f config.toml ]; then
+	if [ -d "$LOCAL_DIR" ]; then cd "$LOCAL_DIR"; fi
+	pr "检查 Piko 构建脚本更新..."
 	git fetch
 	if git status | grep -q 'is behind\|fatal'; then
-		pr "revanced-magisk-module is not synced with upstream."
-		pr "Cloning revanced-magisk-module. config.toml will be preserved."
+		pr "本地脚本与远程不同步，正在重新拉取..."
 		cd ..
-		cp -f revanced-magisk-module/config.toml .
-		rm -rf revanced-magisk-module
-		git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-		mv -f config.toml revanced-magisk-module/config.toml
-		cd revanced-magisk-module
+		[ -f "$LOCAL_DIR/config.toml" ] && cp -f "$LOCAL_DIR/config.toml" .
+		rm -rf "$LOCAL_DIR"
+		git clone "$REPO_URL" --recurse --depth 1 "$LOCAL_DIR"
+		[ -f config.toml ] && mv -f config.toml "$LOCAL_DIR/config.toml"
+		cd "$LOCAL_DIR"
 	fi
 else
-	pr "Cloning revanced-magisk-module."
-	git clone https://github.com/j-hc/revanced-magisk-module --depth 1
-	cd revanced-magisk-module
+	pr "正在克隆 Piko 构建仓库..."
+	git clone "$REPO_URL" --depth 1 "$LOCAL_DIR"
+	cd "$LOCAL_DIR"
+	# 默认禁用所有应用，由用户手动开启
 	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' config.toml
-	grep -q 'revanced-magisk-module' ~/.gitconfig 2>/dev/null ||
-		git config --global --add safe.directory ~/revanced-magisk-module
+	grep -q "$LOCAL_DIR" ~/.gitconfig 2>/dev/null ||
+		git config --global --add safe.directory ~/"$LOCAL_DIR"
 fi
 
-[ -f ~/storage/downloads/revanced-magisk-module/config.toml ] ||
-	cp config.toml ~/storage/downloads/revanced-magisk-module/config.toml
+# 备份配置文件到下载目录方便编辑
+[ -f ~/storage/downloads/piko-magisk-module/config.toml ] ||
+	cp config.toml ~/storage/downloads/piko-magisk-module/config.toml
 
-if ask "Open rvmm-config-gen to generate a config?"; then
+# 注意：j-hc 的网页生成器是针对 ReVanced 的，Piko 的补丁名可能不同
+if ask "是否打开浏览器参考配置生成器？(注意：Piko 补丁名可能与网页不同)"; then
 	am start -a android.intent.action.VIEW -d https://j-hc.github.io/rvmm-config-gen/
 fi
+
 printf "\n"
 until
-	if ask "Open 'config.toml' to configure builds?\nAll are disabled by default, you will need to enable at first time building"; then
-		am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module/config.toml -t text/plain
+	if ask "是否现在编辑 'config.toml'？\n(你需要将想构建的应用 enabled 改为 true)"; then
+		# 调用系统编辑器打开下载目录下的配置文件
+		am start -a android.intent.action.VIEW -d file:///sdcard/Download/piko-magisk-module/config.toml -t text/plain
 	fi
-	ask "Setup is done. Do you want to start building?"
+	ask "配置完成，是否开始构建 Piko 模块？"
 do :; done
-cp -f ~/storage/downloads/revanced-magisk-module/config.toml config.toml
 
+# 同步编辑后的配置并开始构建
+cp -f ~/storage/downloads/piko-magisk-module/config.toml config.toml
 ./build.sh
 
+# 移动产物到下载文件夹
 cd build
 PWD=$(pwd)
 for op in *; do
 	[ "$op" = "*" ] && {
-		pr "glob fail"
+		pr "未发现生成的文件，可能构建失败了。"
 		exit 1
 	}
-	mv -f "${PWD}/${op}" ~/storage/downloads/revanced-magisk-module/"${op}"
+	mv -f "${PWD}/${op}" ~/storage/downloads/piko-magisk-module/"${op}"
 done
 
-pr "Outputs are available in /sdcard/Download/revanced-magisk-module folder"
-am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module -t resource/folder
-sleep 2
-am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module -t resource/folder
+pr "构建完成！文件保存在：内部存储/Download/piko-magisk-module"
+# 自动打开文件夹
+am start -a android.intent.action.VIEW -d file:///sdcard/Download/piko-magisk-module -t resource/folder
