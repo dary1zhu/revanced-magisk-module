@@ -506,7 +506,14 @@ dl_direct() {
 	req "$url" "${output}" || return 1
 }
 get_direct_vers() { cut -d- -f2 <<<"$__DIRECT_APKNAME__"; }
-get_direct_pkg_name() { cut -d- -f1 <<<"$__DIRECT_APKNAME__"; }
+get_direct_pkg_name() {
+    local name=$__DIRECT_APKNAME__
+    if [[ "$name" == instagram* ]]; then
+        echo "com.instagram.android"
+    else
+        echo "${name%%-*}"
+    fi
+}
 get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 # --------------------------------------------------
 
