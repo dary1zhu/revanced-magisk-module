@@ -93,7 +93,7 @@ get_prebuilts() {
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || return 1
 			tag_name=$(jq -r '.tag_name' <<<"$resp") || return 1
-			matches=$(jq -e ".assets | map(select(.name | contains(\"$fprefix\")) | select(.name | (endswith(\"asc\") or endswith(\"json\")) | not))" <<<"$resp") || return 1
+			matches=$(jq -e --arg prefix "$fprefix" '.assets | map(select(.name | ascii_downcase | contains($prefix)) | select(.name | (endswith(".jar") or endswith(".mpp"))))' <<<"$resp") || return 1
 			if [ "$(jq 'length' <<<"$matches")" -gt 1 ]; then
 				local matches_new
 				matches_new=$(jq -e -r 'map(select(.name | contains("-dev") | not))' <<<"$matches")
@@ -512,17 +512,30 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
-	local cmd="java -jar '$cli_jar' patch '$stock_input' --purge -o '$patched_apk' -p '$patches_jar' --keystore=ks.keystore \
---keystore-entry-password=123456789 --keystore-password=123456789 --signer=jhc --keystore-entry-alias=jhc $patcher_args"
+	
+	# --- 核心修改 1：参数名称与顺序 ---
+	# Morphe 使用 --patches 而非 -p
+	# 输入文件 ($stock_input) 通常放在参数后面
+	local cmd="java -jar '$cli_jar' patch --patches '$patches_jar' '$stock_input' -o '$patched_apk' \
+--keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 \
+--keystore-entry-alias jhc --signer jhc $patcher_args"
 
-	# TODO: remove this later
-	local cli_name
-	cli_name=$(basename "$cli_jar")
-	if [ "${cli_name::8}" = revanced ]; then cmd+=" -b"; fi
+	# --- 核心修改 2：移除 ReVanced 专属逻辑 ---
+	# Morphe 不需要 -b 参数，也不需要检查 "revanced" 前缀
+	
+	# --- 核心修改 3：Android 环境适配 ---
+	if [ "$OS" = Android ]; then 
+		# Morphe 使用 --aapt2 而非 --custom-aapt2-binary
+		cmd+=" --aapt2 '${AAPT2}'" 
+	fi
 
-	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary='${AAPT2}'"; fi
-	pr "$cmd"
-	if eval "$cmd"; then [ -f "$patched_apk" ]; else
+	pr "Executing Morphe: $cmd"
+	
+	# 执行并检查结果
+	if eval "$cmd"; then 
+		[ -f "$patched_apk" ] 
+	else
+		epr "Morphe 补丁执行失败！"
 		rm "$patched_apk" 2>/dev/null || :
 		return 1
 	fi
