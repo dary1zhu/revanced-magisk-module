@@ -81,7 +81,7 @@ for table_name in $(toml_get_table_names); do
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
 	patches_ver=$(toml_get "$t" patches-version) || patches_ver=$DEF_PATCHES_VER
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
-	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
+	cli_ver=$(toml_get "$t" cli-version) || cli_ver="latest"
 
 	# 获取 Piko 相关的 Jar 文件
 	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
