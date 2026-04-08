@@ -45,7 +45,7 @@ jobs:
           
           if [ -z "$TAG" ]; then TAG="v0.0.1-dev"; fi
           
-          echo "NEXT_VER_CODE=${TAG}" >> $GITHUB_OUTPUT
+          echo "PIKO_TAG=${TAG}" >> $GITHUB_OUTPUT
           echo "INT_VER_CODE=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
@@ -53,7 +53,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
-          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          PATCHES_VER: ${{ steps.next_ver_code.outputs.PIKO_TAG }}
+          CLI_VER: latest
 
       - name: Get output
         id: get_output
@@ -111,37 +112,3 @@ jobs:
           skip_checkout: true
           file_pattern: build.md *-update.json
           commit_message: "Sync Piko version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}"
-
-      - name: Report to Telegram
-        env:
-          TG_TOKEN: ${{ secrets.TG_TOKEN }}
-        if: env.TG_TOKEN != null
-        run: |
-          cd build || { echo "build folder not found"; exit 1; }
-          # 修改这里为你自己的 Telegram 频道
-          TG_CHAT="@your_piko_channel" 
-          NL=$'\n'
-          APKS=""
-          MODULES=""
-          for OUTPUT in *; do
-            DL_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
-            if [[ $OUTPUT = *.apk ]]; then
-              APKS+="${NL}📦 [${OUTPUT}](${DL_URL})"
-            elif [[ $OUTPUT = *.zip ]]; then
-              MODULES+="${NL}📦 [${OUTPUT}](${DL_URL})"
-            fi
-          done
-          MODULES=${MODULES#"$NL"}
-          APKS=${APKS#"$NL"}
-
-          BODY="$(sed 's/^\* \*\*/↪ \*\*/g; s/^\* `/↪ \*\*/g; s/`/\*/g; s/^\* /\↪/g; s/\*\*/\*/g; s/###//g; s/^- /↪ /g; /^==/d;' ../build.md)"
-          MSG="*New Piko Build!*
-
-          ${BODY}
-
-          *▼ Download Links:*
-          Modules:
-          ${MODULES}
-
-          APKs:
-          ${APKS}"
