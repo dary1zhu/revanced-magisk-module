@@ -5,8 +5,10 @@ enable-module-update = true
 parallel-jobs = 1
 
 # Piko 补丁源（核心：指向 crimera/piko）
+patches-version = "dev"
+cli-version = "dev"
 patches-source = "crimera/piko"
-cli-source = "crimera/piko"
+cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Piko"
 
 [Instagram]
