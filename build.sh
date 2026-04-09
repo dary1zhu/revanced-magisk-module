@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export REMOVE_RV_INTEGRATIONS_CHECKS=false
+
 set -euo pipefail
 shopt -s nullglob
 
