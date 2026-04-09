@@ -12,7 +12,7 @@ rv-brand = "Piko"
 [Instagram]
 enabled = true
 app-name = "Instagram"
-package-name = "instagram_423.apk"
+package-name = "instagram_423"
 
 # 模式建议选 "both"，会同时生成 Magisk 模块和独立安装的 APK
 build-mode = "both"
