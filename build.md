@@ -1,4 +1,4 @@
-Instagram: 423.0.0.47.66  
+Instagram: 425.0.0.0.0  
 
 Install [GmsCore](https://github.com/ReVanced/GmsCore/releases) for non-root APKs  
 Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules from Play Store  
