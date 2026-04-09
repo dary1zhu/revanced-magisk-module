@@ -216,11 +216,14 @@ _req() {
 		if [ -f "$op" ]; then return; fi
 		dlp="$(dirname "$op")/tmp.$(basename "$op")"
 		if [ -f "$dlp" ]; then
-			while [ -f "$dlp" ]; do sleep 1; done
-			return
+			# ⚠️ 警告：如果这里卡住了，说明之前的临时文件没删干净
+			# 建议直接 rm -f "$dlp" 然后继续，而不是死等
+			rm -f "$dlp" 
 		fi
 	fi
-	if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 10 --retry 3 --fail -s -S "$@" "$ip" -o "$dlp"; then
+	# 修改点：去掉 -s，增加 -L# (显示进度条) 和增加超时时间
+	if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" \
+		--connect-timeout 30 --retry 5 --fail -# "$@" "$ip" -o "$dlp"; then
 		epr "Request failed: $ip"
 		return 1
 	fi
