@@ -737,10 +737,12 @@ PKG_VER=$3
 MODULE_ARCH=$ma" >"$1/config"
 }
 module_prop() {
+    local v_code="${INT_VER_CODE:-${GITHUB_RUN_NUMBER}}"
+	
 	echo "id=${1}
 name=${2}
 version=v${3}
-versionCode=${NEXT_VER_CODE}
+versionCode=${v_code}
 author=j-hc
 description=${4}" >"${6}/module.prop"
 
