@@ -1,8 +1,6 @@
 #!/system/bin/sh
 set -x
 
-cp -f "$MODPATH/$PKG_NAME.apk" "$MODPATH/base.apk" 2>/dev/null || cp -f "$MODPATH/base.apk" "$MODPATH/$PKG_NAME.apk" 2>/dev/null
-
 . "$MODPATH/config"
 
 ui_print ""
