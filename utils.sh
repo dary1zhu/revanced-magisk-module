@@ -131,10 +131,9 @@ get_prebuilts() {
 			if [ "$grab_cl" = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
 			
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
-				# 方案二：如果是 Instagram 则直接跳过手术，不破坏函数流程
+				# 逻辑：如果是 Instagram 则直接跳过手术
 				if [[ "$file" != *"com.instagram.android"* ]]; then
 					local extensions_ext
-					# 增加一个保护判断，只有能搜到 shared 文件时才执行，防止报错
 					extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*")
 					
 					if [ -n "$extensions_ext" ]; then
@@ -152,11 +151,13 @@ get_prebuilts() {
 						fi
 						rm -r "${file}-zip" || :
 					else
-						echo ">>> 跳过手术：在 ${file} 中未发现 extensions/shared 文件。"
+						echo ">>> 跳过手术：未发现 shared 文件"
 					fi
 				else
-					echo ">>> 检测到 Instagram：跳过集成修复手术（代码已在 classes.dex 中合并）。"
+					echo ">>> 检测到 Instagram：跳过集成修复手术"
 				fi
+			fi
+		fi
 	done
 	echo
 }
