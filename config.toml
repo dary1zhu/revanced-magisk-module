@@ -12,7 +12,6 @@ rv-brand = "Piko"
 [Instagram]
 enabled = true
 app-name = "Instagram"
-package-name = "instagram_423"
 
 # 模式建议选 "both"，会同时生成 Magisk 模块和独立安装的 APK
 build-mode = "both"
@@ -24,7 +23,7 @@ arch = "arm64-v8a"
 version = "423.0.0.47.66"
 
 # 下载源，脚本会自动去这个页面抓取最新的 APK
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/instagram_423.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.instagram.android-v423.apk"
 
 # 模块在 Magisk 中显示的 ID 名
 module-prop-name = "piko-instagram"
