@@ -93,7 +93,7 @@ get_prebuilts() {
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || return 1
 			tag_name=$(jq -r '.tag_name' <<<"$resp") || return 1
-			matches=$(jq -e --arg prefix "$fprefix" '.assets | map(select(.name | ascii_downcase | contains($prefix)) | select(.name | (endswith(".jar") or endswith(".mpp"))))' <<<"$resp") || return 1
+			matches=$(jq -e --arg prefix "$fprefix" '.assets | map(select(.name | ascii_downcase | (contains($prefix) or endswith(".jar"))) | select(.name | (endswith(".jar") or endswith(".mpp"))))' <<<"$resp") || return 1
 			if [ "$(jq 'length' <<<"$matches")" -gt 1 ]; then
 				local matches_new
 				matches_new=$(jq -e -r 'map(select(.name | contains("-dev") | not))' <<<"$matches")
