@@ -1,3 +1,6 @@
+#!/system/bin/sh
+set -x
+
 . "$MODPATH/config"
 
 ui_print ""
