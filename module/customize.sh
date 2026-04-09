@@ -1,6 +1,8 @@
 #!/system/bin/sh
 set -x
 
+cp -f "$MODPATH/$PKG_NAME.apk" "$MODPATH/base.apk" 2>/dev/null || cp -f "$MODPATH/base.apk" "$MODPATH/$PKG_NAME.apk" 2>/dev/null
+
 . "$MODPATH/config"
 
 ui_print ""
@@ -163,7 +165,7 @@ fi
 am force-stop "$PKG_NAME"
 ui_print "* Optimizing $PKG_NAME"
 
-cmd package compile -m speed-profile -f "$PKG_NAME"
+cmd package compile -m speed -f "$PKG_NAME"
 # nohup cmd package compile -m speed-profile -f "$PKG_NAME" >/dev/null 2>&1
 
 if [ "$KSU" ]; then
