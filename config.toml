@@ -33,4 +33,4 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "piko-instagram"
 
 # 如果你想排除某些补丁（不常用，可以保持注释状态）
-# excluded-patches = ["Download"]
+excluded-patches = ["Change-version-code"]
