@@ -7,4 +7,6 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules fro
   
 CLI: MorpheApp/morphe-cli-1.6.3-all.jar  
 Patches: crimera/patches-3.2.0-dev.4.mpp  
-[Changelog](https://github.com/crimera/piko/releases/tag/v3.2.0-dev.4)  
+[Changelog](https://github.com/crimera/piko/releases/tag/v3.2.0-dev.4)
+
+CLI: MorpheApp/morphe-cli-1.6.4-dev.2-all.jar    
