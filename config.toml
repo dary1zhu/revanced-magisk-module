@@ -13,6 +13,9 @@ patches-source = "crimera/piko"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Piko"
 
+# 如果你想排除某些补丁（不常用，可以保持注释状态）
+excluded-patches = ["Change-version-code"]
+
 [Instagram]
 enabled = true
 app-name = "Instagram"
@@ -31,6 +34,3 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 
 # 模块在 Magisk 中显示的 ID 名
 module-prop-name = "piko-instagram"
-
-# 如果你想排除某些补丁（不常用，可以保持注释状态）
-excluded-patches = ["Change-version-code"]
