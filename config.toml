@@ -4,6 +4,8 @@ enable-module-update = true
 # 并行任务数，手机端建议保持为 1 以免内存溢出
 parallel-jobs = 1
 
+remove-rv-integrations-checks = false
+
 # Piko 补丁源（核心：指向 crimera/piko）
 patches-version = "dev"
 cli-version = "dev"
