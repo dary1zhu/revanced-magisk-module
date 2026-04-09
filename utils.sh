@@ -513,30 +513,27 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
 	
-	# --- 核心修改 1：参数名称与顺序 ---
-	# Morphe 使用 --patches 而非 -p
-	# 输入文件 ($stock_input) 通常放在参数后面
+	# 在命令中加入 --continue-on-error
 	local cmd="java -jar '$cli_jar' patch --patches '$patches_jar' '$stock_input' -o '$patched_apk' \
+--continue-on-error \
 --keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 \
 --keystore-entry-alias jhc --signer jhc $patcher_args"
 
-	# --- 核心修改 2：移除 ReVanced 专属逻辑 ---
-	# Morphe 不需要 -b 参数，也不需要检查 "revanced" 前缀
-	
-	# --- 核心修改 3：Android 环境适配 ---
 	if [ "$OS" = Android ]; then 
-		# Morphe 使用 --aapt2 而非 --custom-aapt2-binary
 		cmd+=" --aapt2 '${AAPT2}'" 
 	fi
 
 	pr "Executing Morphe: $cmd"
 	
-	# 执行并检查结果
 	if eval "$cmd"; then 
 		[ -f "$patched_apk" ] 
 	else
-		epr "Morphe 补丁执行失败！"
-		rm "$patched_apk" 2>/dev/null || :
+		# 即使有错误，如果文件生成了，也认为成功
+		if [ -f "$patched_apk" ]; then
+			wpr "补丁过程有部分跳过，但 APK 已生成。"
+			return 0
+		fi
+		epr "构建彻底失败！"
 		return 1
 	fi
 }
