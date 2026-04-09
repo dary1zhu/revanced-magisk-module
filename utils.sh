@@ -128,36 +128,25 @@ get_prebuilts() {
 		fi
 
 		if [ "$tag" = "Patches" ]; then
-			if [ "$grab_cl" = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
-			
+			if [ "$grab_cl" = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi			
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
-				# 逻辑：如果是 Instagram 则直接跳过手术
-				if [[ "$file" != *"com.instagram.android"* ]]; then
-					local extensions_ext
-					extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*")
-					
-					if [ -n "$extensions_ext" ]; then
-						extensions_ext="${extensions_ext#*.}"
-						if ! (
-							mkdir -p "${file}-zip" || return 1
-							unzip -qo "${file}" -d "${file}-zip" || return 1
-							java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main "${file}-zip/extensions/shared.${extensions_ext}" "${file}-zip/extensions/shared-patched.${extensions_ext}" || return 1
-							mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}" || return 1
-							rm "${file}" || return 1
-							cd "${file}-zip" || abort
-							zip -0rq "${CWD}/${file}" . || return 1
-						) >&2; then
-							echo >&2 "Patching revanced-integrations failed"
-						fi
-						rm -r "${file}-zip" || :
-					else
-						echo ">>> 跳过手术：未发现 shared 文件"
-					fi
-				else
-					echo ">>> 检测到 Instagram：跳过集成修复手术"
+				local extensions_ext
+				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*") extensions_ext="${extensions_ext#*.}"
+				if ! (
+					mkdir -p "${file}-zip" || return 1
+					unzip -qo "${file}" -d "${file}-zip" || return 1
+					java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main "${file}-zip/extensions/shared.${extensions_ext}" "${file}-zip/extensions/shared-patched.${extensions_ext}" || return 1
+					mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}" || return 1
+					rm "${file}" || return 1
+					cd "${file}-zip" || abort
+					zip -0rq "${CWD}/${file}" . || return 1
+				) >&2; then
+					echo >&2 "Patching revanced-integrations failed"
 				fi
+				rm -r "${file}-zip" || :
 			fi
 		fi
+		echo -n "$file "
 	done
 	echo
 }
