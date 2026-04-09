@@ -102,6 +102,8 @@ get_prebuilts() {
 				fi
 			fi
 			if [ "$(jq 'length' <<<"$matches")" -eq 0 ]; then
+				epr "No asset was found matching prefix '$fprefix'. Available assets in this release:"
+				jq -r '.assets[].name' <<<"$resp" >&2
 				epr "No asset was found"
 				return 1
 			elif [ "$(jq 'length' <<<"$matches")" -ne 1 ]; then
