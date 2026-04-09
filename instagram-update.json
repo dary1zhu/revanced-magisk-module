@@ -1,6 +1,6 @@
 {
-  "version": "v425.0.0.0.0 (patches dev.3.mpp)",
-  "versionCode": 7,
-  "zipUrl": "https://github.com/dary1zhu/revanced-magisk-module/releases/download/v3.2.0-dev.3/instagram-piko-module-v425.0.0.0.0-arm64-v8a.zip",
+  "version": "v423.0.0.47.66 (patches dev.4.mpp)",
+  "versionCode": 11,
+  "zipUrl": "https://github.com/dary1zhu/revanced-magisk-module/releases/download/v3.2.0-dev.4/instagram-piko-module-v423.0.0.47.66-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/dary1zhu/revanced-magisk-module/update/build.md"
 }
