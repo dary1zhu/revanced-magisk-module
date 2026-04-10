@@ -714,7 +714,17 @@ build_rv() {
 		local module_output="${app_name_l}-${rv_brand_f}-module-v${version_f}-${arch_f}.zip"
 		pr "Packing module ${table}"
 		cp -f "$patched_apk" "${base_template}/base.apk"
-		if [ "${args[include_stock]}" = true ]; then cp -f "$patched_apk" "${base_template}/${pkg_name}.apk"; fi
+		if [ "${args[include_stock]}" = true ]; then
+			if [[ "$pkg_name" == *"youtube"* ]]; then
+				# YouTube 和 YouTube Music：尝试使用原版 APK 登记 (j-hc 方案)
+				pr "检测到 YouTube 系列，使用原版 APK 进行登记..."
+				cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"
+			else
+				# Instagram 或其他应用：使用补丁版 APK 登记 (Toast 的 Activity 修复方案)
+				pr "检测到 ${app_name}，使用补丁版 APK 进行登记以修复设置闪退..."
+				cp -f "$patched_apk" "${base_template}/${pkg_name}.apk"
+			fi
+		fi
 		pushd >/dev/null "$base_template" || abort "Module template dir not found"
 		zip -"$COMPRESSION_LEVEL" -FSqr "${CWD}/${BUILD_DIR}/${module_output}" .
 		popd >/dev/null || :
