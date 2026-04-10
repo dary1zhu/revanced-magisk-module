@@ -163,22 +163,18 @@ for table_name in $(toml_get_table_names); do
 		app_args[table]="$orig_table (arm64-v8a)"
 		app_args[arch]="arm64-v8a"
 		app_args[module_prop_name]="${orig_prop_name}-arm64"
-		idx=$((idx + 1))
-		build_rv "$(declare -p app_args)" &
-		
-		# 构建 arm
-		if ((idx >= PARALLEL_JOBS)); then wait -n; idx=$((idx - 1)); fi
+		build_rv "$(declare -p app_args)"
+
 		app_args[table]="$orig_table (arm-v7a)"
 		app_args[arch]="arm-v7a"
 		app_args[module_prop_name]="${orig_prop_name}-arm"
-		idx=$((idx + 1))
-		build_rv "$(declare -p app_args)" &
+		build_rv "$(declare -p app_args)"
 	else
-		idx=$((idx + 1))
-		build_rv "$(declare -p app_args)" &
+		# 构建单架构 - 直接运行
+		build_rv "$(declare -p app_args)"
 	fi
 done
-wait
+
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 "${BUILD_DIR}")" ]; then abort "All builds failed."; fi
 
