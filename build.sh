@@ -127,7 +127,7 @@ for table_name in $(toml_get_table_names); do
 	app_args[dpi]=$(toml_get "$t" dpi) || app_args[dpi]=""
 	table_name_f=${table_name,,}
 	table_name_f=${table_name_f// /-}
-	local brand_suffix=${app_args[rv_brand],,}
+	brand_suffix=${app_args[rv_brand],,}
     app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-${brand_suffix}"
 
 	if [ "${app_args[arch]}" = both ]; then
