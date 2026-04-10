@@ -68,11 +68,6 @@ idx=0
 for table_name in $(toml_get_table_names); do
 	# 过滤掉 main 配置
 	if [ -z "$table_name" ] || [ "$table_name" = "main" ]; then continue; fi
-	
-	# 1. 【核心修复】清理上一轮循环的残留数据，防止变量交叉污染
-	unset patches_src patches_ver cli_src cli_ver
-	declare -A app_args
-
 	t=$(toml_get_table "$table_name")
 	enabled=$(toml_get "$t" enabled) || enabled=true
 	vtf "$enabled" "enabled"
@@ -84,7 +79,7 @@ for table_name in $(toml_get_table_names); do
 		idx=$((idx - 1))
 	fi
 
-	# 2. 获取补丁源和版本（确保 Instagram 能拿到 Piko，YouTube 拿到 Morphe）
+	declare -A app_args
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
 	patches_ver=$(toml_get "$t" patches-version) || patches_ver=$DEF_PATCHES_VER
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
@@ -92,7 +87,7 @@ for table_name in $(toml_get_table_names); do
 
 	# 获取补丁工具文件
 	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
-		epr "无法获取 ${table_name} 的预构建文件 (Jar)"
+		epr "Could not get prebuilts"
 		continue
 	fi
 	read -r cli_jar patches_jar <<<"$PREBUILTS"
@@ -104,10 +99,10 @@ for table_name in $(toml_get_table_names); do
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]=$DEF_RV_BRAND
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
-	if [ -n "${app_args[excluded_patches]}" ] && [[ ${app_args[excluded_patches]} != *'"'* ]]; then abort "excluded-patches 内部的补丁名必须加引号"; fi
+	if [ -n "${app_args[excluded_patches]}" ] && [[ ${app_args[excluded_patches]} != *'"'* ]]; then abort "patch names inside excluded-patches must be quoted"; fi
 	
 	app_args[included_patches]=$(toml_get "$t" included-patches) || app_args[included_patches]=""
-	if [ -n "${app_args[included_patches]}" ] && [[ ${app_args[included_patches]} != *'"'* ]]; then abort "included-patches 内部的补丁名必须加引号"; fi
+	if [ -n "${app_args[excluded_patches]}" ] && [[ ${app_args[excluded_patches]} != *'"'* ]]; then abort "patch names inside excluded-patches must be quoted"; fi
 	
 	app_args[exclusive_patches]=$(toml_get "$t" exclusive-patches) && vtf "${app_args[exclusive_patches]}" "exclusive-patches" || app_args[exclusive_patches]=false
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
@@ -117,7 +112,7 @@ for table_name in $(toml_get_table_names); do
 	
 	app_args[build_mode]=$(toml_get "$t" build-mode) && {
 		if ! isoneof "${app_args[build_mode]}" both apk module; then
-			abort "ERROR: '${table_name}' 的构建模式 '${app_args[build_mode]}' 无效"
+			abort "ERROR: build-mode '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' is allowed"
 		fi
 	} || app_args[build_mode]=apk
 
@@ -133,11 +128,11 @@ for table_name in $(toml_get_table_names); do
 		fi
 	done
 	
-	if [ -z "${app_args[dl_from]-}" ]; then abort "错误: '$table_name' 没有设置 dlurl"; fi
+	if [ -z "${app_args[dl_from]-}" ]; then abort "ERROR: no 'dlurl' option was set for '$table_name'. (${DL_SRCS[*]})"; fi
 	
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
 	if ! isoneof "${app_args[arch]}" "both" "all" "arm64-v8a" "arm-v7a" "x86_64" "x86"; then
-		abort "架构错误: '${app_args[arch]}'"
+		abort "wrong arch '${app_args[arch]}' for '$table_name'"
 	fi
 
 	app_args[include_stock]=$(toml_get "$t" include-stock) || app_args[include_stock]=true && vtf "${app_args[include_stock]}" "include-stock"
@@ -146,30 +141,38 @@ for table_name in $(toml_get_table_names); do
 	# 4. 生成模块 ID 和名称 (品牌化)
 	table_name_f=${table_name,,}
 	table_name_f=${table_name_f// /-}
-	brand_suffix=${app_args[rv_brand],,} # 这里的后缀会根据当前的 rv_brand 动态变化
-	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-${brand_suffix}"
+	brand_suffix=${app_args[rv_brand],,}
+    app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-${brand_suffix}"
 
 	# 5. 启动后台构建进程
 	if [ "${app_args[arch]}" = both ]; then
-		# 这里不需要加 local，直接操作临时变量
-		orig_table="${app_args[table]}"
-		orig_prop_name="${app_args[module_prop_name]}"
-		
-		# 构建 arm64
-		app_args[table]="$orig_table (arm64-v8a)"
+	    app_args[table]="$table_name (arm64-v8a)"
 		app_args[arch]="arm64-v8a"
-		app_args[module_prop_name]="${orig_prop_name}-arm64"
-		build_rv "$(declare -p app_args)"
-
-		app_args[table]="$orig_table (arm-v7a)"
+		module_prop_name_b=${app_args[module_prop_name]}
+		app_args[module_prop_name]="${module_prop_name_b}-arm64"
+		idx=$((idx + 1))
+		build_rv "$(declare -p app_args)" &
+		
+		app_args[table]="$table_name (arm-v7a)"
 		app_args[arch]="arm-v7a"
-		app_args[module_prop_name]="${orig_prop_name}-arm"
-		build_rv "$(declare -p app_args)"
+		app_args[module_prop_name]="${module_prop_name_b}-arm"
+		if ((idx >= PARALLEL_JOBS)); then
+			wait -n
+			idx=$((idx - 1))
+		fi
+		idx=$((idx + 1))
+		build_rv "$(declare -p app_args)" &
 	else
-		# 构建单架构 - 直接运行
-		build_rv "$(declare -p app_args)"
+		#if [ "${app_args[arch]}" = "arm64-v8a" ]; then
+		#	app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
+		#elif [ "${app_args[arch]}" = "arm-v7a" ]; then
+		#	app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
+		#fi
+		idx=$((idx + 1))
+		build_rv "$(declare -p app_args)" &
 	fi
 done
+wait
 
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 "${BUILD_DIR}")" ]; then abort "All builds failed."; fi
