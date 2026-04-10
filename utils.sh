@@ -130,21 +130,37 @@ get_prebuilts() {
 		if [ "$tag" = "Patches" ]; then
 			if [ "$grab_cl" = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi			
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
+				pr "正在解压补丁包进行手术..." >&2
 				local extensions_ext
-				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*") extensions_ext="${extensions_ext#*.}"
-				if ! (
-					mkdir -p "${file}-zip" || return 1
-					unzip -qo "${file}" -d "${file}-zip" || return 1
-					java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main "${file}-zip/extensions/shared.${extensions_ext}" "${file}-zip/extensions/shared-patched.${extensions_ext}" || return 1
-					mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}" || return 1
-					rm "${file}" || return 1
-					cd "${file}-zip" || abort
-					zip -0rq "${CWD}/${file}" . || return 1
-				) >&2; then
-					echo >&2 "Patching revanced-integrations failed"
+				# 增加检测：看看到底有没有 shared 文件
+				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" 2>/dev/null | grep -o "shared\..*" | head -1) || :
+				extensions_ext="${extensions_ext#*.}"
+
+				if [ -z "$extensions_ext" ]; then
+					wpr "跳过：在 .mpp 中找不到 extensions/shared.*"
+				else
+					if ! (
+						mkdir -p "${file}-zip"
+						# 必须加 -o 强制覆盖，防止卡住等待用户输入
+						unzip -qo "${file}" -d "${file}-zip" || exit 1
+						
+						pr "正在修正集成包路径..." >&2
+						# 注意：这里直接用 /usr/bin/java 或者确认 java 路径可用
+						java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main \
+							"${file}-zip/extensions/shared.${extensions_ext}" \
+							"${file}-zip/extensions/shared-patched.${extensions_ext}" || exit 1
+						
+						mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}"
+						rm -f "${file}"
+						cd "${file}-zip"
+						zip -0rq "${CWD}/${file}" . || exit 1
+					) >&2; then
+						epr "集成包补丁过程出错，已跳过以防止卡死"
+					fi
 				fi
-				rm -r "${file}-zip" || :
+				rm -rf "${file}-zip" || :
 			fi
+		fi
 		fi
 		echo -n "$file "
 	done
