@@ -702,23 +702,32 @@ build_rv() {
 			"$base_template"
 
 		local module_output="${app_name_l}-${rv_brand_f}-module-v${version_f}-${arch_f}.zip"
-		pr "Packing module ${table}"
-		cp -f "$patched_apk" "${base_template}/base.apk"
-		if [ "${args[include_stock]}" = true ]; then
-			if [[ "$pkg_name" == *"youtube"* ]]; then
-				# YouTube 和 YouTube Music：尝试使用原版 APK 登记 (j-hc 方案)
-				pr "检测到 YouTube 系列，使用原版 APK 进行登记..."
+		
+		if [[ "$pkg_name" == "com.instagram.android" ]]; then
+			pr "检测到 Instagram，启动‘全量合体’打包模式..."
+			# 1. 强制使用补丁版（fat APK）作为 base.apk
+			# 此时的 $patched_apk 必须是你在 build 阶段用 is_root=false 生成的
+			cp -f "$patched_apk" "${base_template}/base.apk"
+			
+			# 2. 关键：删掉模块里的“挂载登记”文件
+			# 因为代码已经合进 base.apk 了，我们不需要另一个 apk 来混淆系统
+			rm -f "${base_template}/${pkg_name}.apk" 2>/dev/null || :
+			
+			# 3. 如果你的模块脚本（service.sh）会自动寻找这个包，我们放一个空文件或者干脆不放
+			pr "已将全量代码合入 base.apk，移除多余的挂载包。"
+		else
+			# YouTube 等其他应用维持原样
+			cp -f "$patched_apk" "${base_template}/base.apk"
+			if [ "${args[include_stock]}" = true ]; then
 				cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"
-			else
-				# Instagram 或其他应用：使用补丁版 APK 登记 (Toast 的 Activity 修复方案)
-				pr "检测到 ${app_name}，使用补丁版 APK 进行登记以修复设置闪退..."
-				cp -f "$patched_apk" "${base_template}/${pkg_name}.apk"
 			fi
 		fi
-		pushd >/dev/null "$base_template" || abort "Module template dir not found"
+		# --- 逻辑结束 ---
+
+		pr "正在压制模块: ${table}"
+		pushd >/dev/null "$base_template" || abort "找不到模块模板目录"
 		zip -"$COMPRESSION_LEVEL" -FSqr "${CWD}/${BUILD_DIR}/${module_output}" .
 		popd >/dev/null || :
-		pr "Built ${table} (root): '${BUILD_DIR}/${module_output}'"
 	done
 }
 
