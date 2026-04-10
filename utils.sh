@@ -146,11 +146,15 @@ get_prebuilts() {
 						
 						pr "正在修正集成包路径..." >&2
 						# 注意：这里直接用 /usr/bin/java 或者确认 java 路径可用
-						java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main \
+						if ! timeout 60 /usr/bin/java -Xmx512M -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main \
 							"${file}-zip/extensions/shared.${extensions_ext}" \
-							"${file}-zip/extensions/shared-patched.${extensions_ext}" || exit 1
+							"${file}-zip/extensions/shared-patched.${extensions_ext}"; then
+						    epr "Java 修正超时或失败，正在跳过并尝试维持原样..."
+							rm -f "${file}-zip/extensions/shared-patched.${extensions_ext}"
+						else
+						    mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}"
+						fi
 						
-						mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}"
 						rm -f "${file}"
 						cd "${file}-zip"
 						zip -0rq "${CWD}/${file}" . || exit 1
