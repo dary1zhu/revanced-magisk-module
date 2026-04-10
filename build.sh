@@ -127,7 +127,8 @@ for table_name in $(toml_get_table_names); do
 	app_args[dpi]=$(toml_get "$t" dpi) || app_args[dpi]=""
 	table_name_f=${table_name,,}
 	table_name_f=${table_name_f// /-}
-	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-piko"
+	local brand_suffix=${app_args[rv_brand],,}
+    app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-${brand_suffix}"
 
 	if [ "${app_args[arch]}" = both ]; then
 		app_args[table]="$table_name (arm64-v8a)"
@@ -146,11 +147,11 @@ for table_name in $(toml_get_table_names); do
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
 	else
-		if [ "${app_args[arch]}" = "arm64-v8a" ]; then
-			app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
-		elif [ "${app_args[arch]}" = "arm-v7a" ]; then
-			app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
-		fi
+		#if [ "${app_args[arch]}" = "arm64-v8a" ]; then
+		#	app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
+		#elif [ "${app_args[arch]}" = "arm-v7a" ]; then
+		#	app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
+		#fi
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
 	fi
@@ -162,7 +163,7 @@ if [ -z "$(ls -A1 "${BUILD_DIR}")" ]; then abort "All builds failed."; fi
 # --- 日志说明修改 ---
 log "\nInstall [GmsCore](https://github.com/ReVanced/GmsCore/releases) for non-root APKs"
 log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules from Play Store"
-log "\n[Piko-Magisk-Build](https://github.com/${GITHUB_REPOSITORY:-crimera/piko})\n"
+log "\n[Morphe-Magisk-Build](https://github.com/${GITHUB_REPOSITORY:-$DEF_PATCHES_SRC})\n"
 log "$(cat "$TEMP_DIR"/*/changelog.md)"
 
 SKIPPED=$(cat "$TEMP_DIR"/skipped 2>/dev/null || :)
