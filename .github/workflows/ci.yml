@@ -1,4 +1,4 @@
-name: Piko CI
+name: Morphe Modules CI
 on:
   workflow_dispatch:
   schedule:
@@ -9,54 +9,49 @@ jobs:
   check:
     permissions: write-all
     runs-on: ubuntu-latest
+    outputs:
+      SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Should build?
+      - name: Check for Updates (Piko & Morphe)
         id: should_build
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 尝试切换到 update 分支获取上一次的构建记录
-          if ! git checkout origin/update build.md; then
-            echo "First time building Piko modules!"
+          # 尝试获取上一次的构建记录
+          if ! git checkout origin/update build.md 2>/dev/null; then
+            echo "首次构建，启动全量任务！"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
-            # 运行 build.sh 的配置更新模式。
-            # 因为你已经把 build.sh 里的默认源改成了 crimera/piko，
-            # 所以这里会自动对比 Piko 官方的最新版本。
+            # 这里的 ./build.sh --config-update 非常聪明
+            # 它会遍历你 config.toml 里所有的应用
+            # 只要 Instagram 的 Piko 或是 YouTube 的 Morphe 有一个更新了，它就会有输出
             UPDATE_CFG=$(./build.sh config.toml --config-update)
-            if [ "$UPDATE_CFG" ]; then
-              echo "New Piko version detected!"
-              echo "'$UPDATE_CFG'"
+            if [ -n "$UPDATE_CFG" ]; then
+              echo "检测到新版本补丁！"
+              echo "更新列表: $UPDATE_CFG"
               echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
             else
-              echo "No new version found in Piko upstream."
+              echo "所有组件均已是最新，跳过本次构建。"
               echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
             fi
           fi
 
-      - name: Clear older runs
+      - name: Cleanup Workflow Runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 清理过期的 Workflow 运行记录，保持界面整洁
-          gh run list -L 400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$GITHUB_REPOSITORY/actions/runs/ID" -X DELETE || :
-
-    outputs:
-      SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
+          # 保持 Actions 界面整洁，只保留最近 10 次记录
+          gh run list -L 100 --json databaseId -q '.[].databaseId' | tail -n+11 | xargs -IID gh api "repos/$GITHUB_REPOSITORY/actions/runs/ID" -X DELETE || :
 
   build:
-    permissions: write-all
     needs: check
-    # 只有当 check 任务发现新版本时，才会调用 build.yml
-    uses: ./.github/workflows/build.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
-    secrets: inherit
+    # 修正了之前重复调用的错误
     uses: ./.github/workflows/build.yml
-    if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
     secrets: inherit
