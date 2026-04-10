@@ -516,35 +516,21 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 # --------------------------------------------------
 
 patch_apk() {
-    local stock_input="$1"
-    local patched_apk="$2"
-    local patcher_args="$3"
-    local cli_jar="$4"
-    local patches_jar="$5"
-	
-	# 在命令中加入 --continue-on-error
-	local cmd="java -jar \"$cli_jar\" patch --patches \"$patches_jar\" \"$stock_input\" -o \"$patched_apk\" --continue-on-error --keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 --keystore-entry-alias jhc --signer jhc $patcher_args"
+	local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
+	local cmd="java -jar '$cli_jar' patch '$stock_input' --purge -o '$patched_apk' -p '$patches_jar' --keystore=ks.keystore \
+--keystore-entry-password=123456789 --keystore-password=123456789 --signer=jhc --keystore-entry-alias=jhc $patcher_args"
 
-	if [ "$OS" = Android ]; then
-        cmd+=" --aapt2 \"${AAPT2}\""
-    fi
+	# TODO: remove this later
+	local cli_name
+	cli_name=$(basename "$cli_jar")
+	if [ "${cli_name::8}" = revanced ]; then cmd+=" -b"; fi
 
-	pr "Executing Morphe: $cmd"
-	
-	if eval "$cmd"; then
-        if [ -f "$patched_apk" ]; then
-            return 0
-        fi
-    fi
-
-    # 容错处理：即使报错，只要文件生成了也算成功
-    if [ -f "$patched_apk" ]; then
-        wpr "构建过程有警告，但 APK 已生成。"
-        return 0
-    fi
-
-    epr "构建彻底失败！"
-    return 1
+	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary='${AAPT2}'"; fi
+	pr "$cmd"
+	if eval "$cmd"; then [ -f "$patched_apk" ]; else
+		rm "$patched_apk" 2>/dev/null || :
+		return 1
+	fi
 }
 
 check_sig() {
