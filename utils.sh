@@ -523,10 +523,7 @@ patch_apk() {
     local patches_jar="$5"
 	
 	# 在命令中加入 --continue-on-error
-	local cmd="java -jar \"$cli_jar\" patch --patches \"$patches_jar\" \"$stock_input\" -o \"$patched_apk\" 
---continue-on-error \
---keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 \
---keystore-entry-alias jhc --signer jhc $patcher_args"
+	local cmd="java -jar \"$cli_jar\" patch --patches \"$patches_jar\" \"$stock_input\" -o \"$patched_apk\" --continue-on-error --keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 --keystore-entry-alias jhc --signer jhc $patcher_args"
 
 	if [ "$OS" = Android ]; then
         cmd+=" --aapt2 \"${AAPT2}\""
