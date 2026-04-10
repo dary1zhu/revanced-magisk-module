@@ -1,4 +1,4 @@
-name: Build Piko Modules
+name: Build Morphe Modules
 on:
   workflow_call:
     inputs:
@@ -39,14 +39,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 核心修改：去掉 --exclude-pre-release (默认 gh 会列出所有)
-          # 使用 gh release list 获取第一个，无论它是正式版还是预发布版
-          TAG=$(gh release list -R crimera/piko --limit 1 | awk -F '\t' '{print $3}')
+          # 1. 获取 Piko 的最新 Tag (用于 Instagram)
+          PIKO_TAG=$(gh release list -R crimera/piko --limit 1 | awk -F '\t' '{print $3}')
+          [ -z "$PIKO_TAG" ] && PIKO_TAG="v0.0.1-dev"
           
-          if [ -z "$TAG" ]; then TAG="v0.0.1-dev"; fi
+          # 2. 获取 Morphe 的最新 Tag (用于 YouTube/Music)
+          MORPHE_TAG=$(gh release list -R MorpheApps/morphe-patches --limit 1 | awk -F '\t' '{print $3}')
+          [ -z "$MORPHE_TAG" ] && MORPHE_TAG="v1.0.0"
+
+          # 3. 定义你自己的 Release Tag (组合名)
+          # 这样你的 Release 会叫 Piko-v3.x-Morphe-v2.x，非常清晰
+          COMBINED_TAG="Piko-${PIKO_TAG}-Morphe-${MORPHE_TAG}"
           
-          echo "PIKO_TAG=${TAG}" >> $GITHUB_OUTPUT
-          echo "NEXT_VER_CODE=${TAG}" >> $GITHUB_OUTPUT
+          echo "PIKO_TAG=${PIKO_TAG}" >> $GITHUB_OUTPUT
+          echo "MORPHE_TAG=${MORPHE_TAG}" >> $GITHUB_OUTPUT
+          echo "NEXT_VER_CODE=${COMBINED_TAG}" >> $GITHUB_OUTPUT
           echo "INT_VER_CODE=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
@@ -54,9 +61,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
-          PATCHES_VER: ${{ steps.next_ver_code.outputs.PIKO_TAG }}
           CLI_VER: latest
-          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.PIKO_TAG }}
 
       - name: Get output
         id: get_output
