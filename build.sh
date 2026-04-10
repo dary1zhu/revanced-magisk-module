@@ -64,10 +64,6 @@ gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releas
 gh_dl "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86"
 gh_dl "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86_64"
 
-mkdir -p "$BIN_DIR"
-gh_dl "${BIN_DIR}/paccer.jar" "https://github.com/j-hc/revanced-magisk-module/raw/main/bin/paccer.jar"
-gh_dl "${BIN_DIR}/dexlib2.jar" "https://github.com/j-hc/revanced-magisk-module/raw/main/bin/dexlib2.jar"
-
 idx=0
 for table_name in $(toml_get_table_names); do
 	# 过滤掉 main 配置
