@@ -5,38 +5,20 @@ set -e
 # 颜色输出函数
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
 
-# 交互询问函数
-ask() {
-	local y
-	for ((n = 0; n < 3; n++)); do
-		pr "$1 [y/n]"
-		if read -r y; then
-			if [ "$y" = y ]; then
-				return 0
-			elif [ "$y" = n ]; then
-				return 1
-			fi
-		fi
-		pr "Asking again..."
-	done
-	return 1
-}
-
-pr "获取存储权限..."
-until
-	yes | termux-setup-storage >/dev/null 2>&1
-	ls /sdcard >/dev/null 2>&1
-do sleep 1; done
-
 # 环境初始化 (每月检查一次)
-if [ ! -f ~/.piko_"$(date '+%Y%m')" ]; then
-	pr "正在安装构建环境 (Java, Git, Curl, JQ...)"
-	yes "" | pkg update -y && pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" && pkg install -y git curl jq openjdk-17 zip
-	: >~/.piko_"$(date '+%Y%m')"
+if [ ! -f ~/.morphe_env_"$(date '+%Y%m')" ]; then
+	pr "正在初始化构建环境 (Java 17, Git, JQ...)"
+	pkg update -y && pkg upgrade -y
+	pkg install -y git curl jq openjdk-17 zip termux-api
+	: >~/.morphe_env_"$(date '+%Y%m')"
 fi
 
+pr "获取存储权限..."
+termux-setup-storage
+sleep 1
 # 创建下载目录
-mkdir -p /sdcard/Download/piko-magisk-module/
+DOWNLOAD_DIR="/sdcard/Download/revanced-custom-build"
+mkdir -p "$DOWNLOAD_DIR"
 
 # --- 核心修改：仓库地址 ---
 # 请将下面的 URL 换成你自己修改后的那个仓库地址
@@ -45,7 +27,7 @@ LOCAL_DIR="revanced-magisk-module"
 
 if [ -d "$LOCAL_DIR" ] || [ -f config.toml ]; then
 	if [ -d "$LOCAL_DIR" ]; then cd "$LOCAL_DIR"; fi
-	pr "检查 Piko 构建脚本更新..."
+	pr "检查构建脚本更新..."
 	git fetch
 	if git status | grep -q 'is behind\|fatal'; then
 		pr "本地脚本与远程不同步，正在重新拉取..."
@@ -57,7 +39,7 @@ if [ -d "$LOCAL_DIR" ] || [ -f config.toml ]; then
 		cd "$LOCAL_DIR"
 	fi
 else
-	pr "正在克隆 Piko 构建仓库..."
+	pr "正在克隆构建仓库..."
 	git clone "$REPO_URL" --depth 1 "$LOCAL_DIR"
 	cd "$LOCAL_DIR"
 	# 默认禁用所有应用，由用户手动开启
@@ -67,11 +49,11 @@ else
 fi
 
 # 备份配置文件到下载目录方便编辑
-[ -f ~/storage/downloads/piko-magisk-module/config.toml ] ||
-	cp config.toml ~/storage/downloads/piko-magisk-module/config.toml
+[ -f ~/storage/downloads/morphe-magisk-module/config.toml ] ||
+	cp config.toml ~/storage/downloads/morphe-magisk-module/config.toml
 
 # 注意：j-hc 的网页生成器是针对 ReVanced 的，Piko 的补丁名可能不同
-if ask "是否打开浏览器参考配置生成器？(注意：Piko 补丁名可能与网页不同)"; then
+if ask "是否打开浏览器参考配置生成器？(注意：补丁名可能与网页不同)"; then
 	am start -a android.intent.action.VIEW -d https://j-hc.github.io/rvmm-config-gen/
 fi
 
@@ -79,13 +61,13 @@ printf "\n"
 until
 	if ask "是否现在编辑 'config.toml'？\n(你需要将想构建的应用 enabled 改为 true)"; then
 		# 调用系统编辑器打开下载目录下的配置文件
-		am start -a android.intent.action.VIEW -d file:///sdcard/Download/piko-magisk-module/config.toml -t text/plain
+		am start -a android.intent.action.VIEW -d file:///sdcard/Download/morphe-magisk-module/config.toml -t text/plain
 	fi
-	ask "配置完成，是否开始构建 Piko 模块？"
+	ask "配置完成，是否开始构建模块？"
 do :; done
 
 # 同步编辑后的配置并开始构建
-cp -f ~/storage/downloads/piko-magisk-module/config.toml config.toml
+cp -f ~/storage/downloads/morphe-magisk-module/config.toml config.toml
 ./build.sh
 
 # 移动产物到下载文件夹
@@ -96,9 +78,9 @@ for op in *; do
 		pr "未发现生成的文件，可能构建失败了。"
 		exit 1
 	}
-	mv -f "${PWD}/${op}" ~/storage/downloads/piko-magisk-module/"${op}"
+	mv -f "${PWD}/${op}" ~/storage/downloads/morphe-magisk-module/"${op}"
 done
 
-pr "构建完成！文件保存在：内部存储/Download/piko-magisk-module"
+pr "构建完成！文件保存在：内部存储/Download/morphe-magisk-module"
 # 自动打开文件夹
-am start -a android.intent.action.VIEW -d file:///sdcard/Download/piko-magisk-module -t resource/folder
+am start -a android.intent.action.VIEW -d file:///sdcard/Download/morphe-magisk-module -t resource/folder
