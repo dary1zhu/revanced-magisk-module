@@ -722,9 +722,18 @@ build_rv() {
 	done
 }
 
-list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
-join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
+list_args() { 
+    # 删除回车，处理空格，并确保补丁名被正确切分
+    tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/^"//;s/"$//' | grep -v '^$' || :
+}
 
+# 修改后的 join_args：给每个参数强制加上转义的双引号
+join_args() { 
+    list_args "$1" | while read -r line; do
+        # 将内部的双引号转义，并用双引号包裹整个补丁名
+        echo -n "${2} \"${line//\"/\\\"}\" "
+    done
+}
 module_config() {
 	local ma=""
 	if [ "$4" = "arm64-v8a" ]; then
