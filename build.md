@@ -1,5 +1,5 @@
 Instagram: 425.0.0.0.0  
-YouTube: 19.15.282  
+YouTube: 21.15.282  
 YouTube-Music: 9.13.50  
 
 Install [GmsCore](https://github.com/ReVanced/GmsCore/releases) for non-root APKs  
