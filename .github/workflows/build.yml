@@ -44,8 +44,8 @@ jobs:
           [ -z "$PIKO_TAG" ] && PIKO_TAG="v0.0.1-dev"
           
           # 2. 获取 Morphe 的最新 Tag (用于 YouTube/Music)
-          MORPHE_TAG=$(gh release list -R MorpheApps/morphe-patches --limit 1 | awk -F '\t' '{print $3}')
-          [ -z "$MORPHE_TAG" ] && MORPHE_TAG="v1.0.0"
+          MORPHE_TAG=$(gh release list -R MorpheApp/morphe-patches --limit 1 | awk -F '\t' '{print $3}')
+          [ -z "$MORPHE_TAG" ] && MORPHE_TAG="v0.0.1-dev"
 
           # 3. 定义你自己的 Release Tag (组合名)
           # 这样你的 Release 会叫 Piko-v3.x-Morphe-v2.x，非常清晰
