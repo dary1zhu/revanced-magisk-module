@@ -524,9 +524,9 @@ patch_apk() {
 --keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 \
 --keystore-entry-alias jhc --signer jhc $patcher_args"
 
-	if [ "$OS" = Android ]; then 
-		cmd+=" --aapt2 '${AAPT2}'" 
-	fi
+	if [ "$OS" = Android ]; then
+        cmd+=" --aapt2 \"${AAPT2}\""
+    fi
 
 	pr "Executing Morphe: $cmd"
 	
