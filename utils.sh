@@ -530,17 +530,20 @@ patch_apk() {
 
 	pr "Executing Morphe: $cmd"
 	
-	if eval "$cmd"; then 
-		[ -f "$patched_apk" ] 
-	else
-		# 即使有错误，如果文件生成了，也认为成功
-		if [ -f "$patched_apk" ]; then
-			wpr "补丁过程有部分跳过，但 APK 已生成。"
-			return 0
-		fi
-		epr "构建彻底失败！"
-		return 1
-	fi
+	if eval "$cmd"; then
+        if [ -f "$patched_apk" ]; then
+            return 0
+        fi
+    fi
+
+    # 容错处理：即使报错，只要文件生成了也算成功
+    if [ -f "$patched_apk" ]; then
+        wpr "构建过程有警告，但 APK 已生成。"
+        return 0
+    fi
+
+    epr "构建彻底失败！"
+    return 1
 }
 
 check_sig() {
