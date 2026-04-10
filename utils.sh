@@ -519,7 +519,7 @@ patch_apk() {
     local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
 	
 	# 在命令中加入 --continue-on-error
-	local cmd="java -jar '$cli_jar' patch --patches '$patches_jar' '$stock_input' -o '$patched_apk' 
+	local cmd="java -jar \"$cli_jar\" patch --patches \"$patches_jar\" \"$stock_input\" -o \"$patched_apk\" 
 --continue-on-error \
 --keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 \
 --keystore-entry-alias jhc --signer jhc $patcher_args"
