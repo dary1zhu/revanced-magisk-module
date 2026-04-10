@@ -54,10 +54,13 @@ java() { env -i java --enable-native-access=ALL-UNNAMED "$@"; }
 
 get_prebuilts() {
 	local cli_src=$1 cli_ver=$2 patches_src=$3 patches_ver=$4
-	pr "Getting prebuilts (${patches_src%/*})" >&2
-	local cl_dir=${patches_src%/*}
-	cl_dir=${TEMP_DIR}/${cl_dir,,}-rv
-	[ -d "$cl_dir" ] || mkdir "$cl_dir"
+	# 增加调试输出，确认传入的源到底是谁
+	pr "正在获取预构建文件: $patches_src" >&2
+	
+	# 使用完整的仓库名作为文件夹名，防止 crimera 和 MorpheApp 撞车
+	local owner_repo=${patches_src//\//_}
+	local cl_dir="${TEMP_DIR}/${owner_repo,,}-rv"
+	[ -d "$cl_dir" ] || mkdir -p "$cl_dir"
 
 	for src_ver in "$cli_src CLI $cli_ver cli" "$patches_src Patches $patches_ver patches"; do
 		set -- $src_ver
