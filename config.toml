@@ -1,7 +1,7 @@
 [main]
 enable-module-update = true
 parallel-jobs = 1
-remove-rv-integrations-checks = false
+remove-rv-integrations-checks = true
 
 cli-version = "dev"
 cli-source = "MorpheApp/morphe-cli"
