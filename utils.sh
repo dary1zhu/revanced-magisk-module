@@ -516,7 +516,11 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 # --------------------------------------------------
 
 patch_apk() {
-    local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
+    local stock_input="$1"
+    local patched_apk="$2"
+    local patcher_args="$3"
+    local cli_jar="$4"
+    local patches_jar="$5"
 	
 	# 在命令中加入 --continue-on-error
 	local cmd="java -jar \"$cli_jar\" patch --patches \"$patches_jar\" \"$stock_input\" -o \"$patched_apk\" 
