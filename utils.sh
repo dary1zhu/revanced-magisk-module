@@ -735,8 +735,18 @@ build_rv() {
 	done
 }
 
-list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
-join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
+list_args() { 
+    # 逻辑：删除杂质 -> 统一空格 -> 按 " " 换行 -> 去掉首尾多余引号
+    tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/^"//;s/"$//' | grep -v '^$' || :
+}
+
+join_args() { 
+    # 逻辑：循环读取每一个补丁名，给它套上转义的双引号
+    list_args "$1" | while read -r line; do
+        # 这一行很关键：它把补丁名里的 " 转义成 \"，然后外面再包一层 "
+        echo -n "${2} \"${line//\"/\\\"}\" "
+    done
+}
 
 module_config() {
 	local ma=""
