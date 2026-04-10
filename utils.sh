@@ -161,7 +161,6 @@ get_prebuilts() {
 				rm -rf "${file}-zip" || :
 			fi
 		fi
-		fi
 		echo -n "$file "
 	done
 	echo
