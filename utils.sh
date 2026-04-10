@@ -23,17 +23,14 @@ toml_get_table_names() { jq -r -e 'to_entries[] | select(.value | type == "objec
 toml_get_table_main() { jq -r -e 'to_entries | map(select(.value | type != "object")) | from_entries' <<<"$__TOML__"; }
 toml_get_table() { jq -r -e ".\"${1}\"" <<<"$__TOML__"; }
 toml_get() {
-	local op quote_placeholder=$'\001'
-	op=$(jq -r ".\"${2}\" | values" <<<"$1")
-	if [ "$op" ]; then
-		op="${op#"${op%%[![:space:]]*}"}"
-		op="${op%"${op##*[![:space:]]}"}"
-		op=${op//\\\'/$quote_placeholder}
-		op=${op//"''"/$quote_placeholder}
-		op=${op//"'"/'"'}
-		op=${op//$quote_placeholder/$'\''}
-		echo "$op"
-	else return 1; fi
+    # 使用 jq 提取值，如果是数组就展开 (.[]), 否则原样输出
+    local op
+    op=$(jq -r ".\"$2\" | if type == \"array\" then .[] else . end" <<<"$1")
+    if [ -n "$op" ] && [ "$op" != "null" ]; then
+        echo "$op"
+    else
+        return 1
+    fi
 }
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
@@ -743,18 +740,17 @@ build_rv() {
 }
 
 list_args() { 
-    # 逻辑：删除杂质 -> 统一空格 -> 按 " " 换行 -> 去掉首尾多余引号
-    tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/^"//;s/"$//' | grep -v '^$' || :
+    # 现在输入已经是纯净的行了，直接去掉可能残余的引号即可
+    echo "$1" | sed 's/^"//;s/"$//' | grep -v '^$' || :
 }
 
 join_args() { 
     # 逻辑：循环读取每一个补丁名，给它套上转义的双引号
     list_args "$1" | while read -r line; do
-        # 这一行很关键：它把补丁名里的 " 转义成 \"，然后外面再包一层 "
+        # 核心：确保补丁名里的双引号被转义，然后两端加上双引号防护
         echo -n "${2} \"${line//\"/\\\"}\" "
     done
 }
-
 module_config() {
 	local ma=""
 	if [ "$4" = "arm64-v8a" ]; then
