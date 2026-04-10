@@ -23,14 +23,17 @@ toml_get_table_names() { jq -r -e 'to_entries[] | select(.value | type == "objec
 toml_get_table_main() { jq -r -e 'to_entries | map(select(.value | type != "object")) | from_entries' <<<"$__TOML__"; }
 toml_get_table() { jq -r -e ".\"${1}\"" <<<"$__TOML__"; }
 toml_get() {
-    # 使用 jq 提取值，如果是数组就展开 (.[]), 否则原样输出
-    local op
-    op=$(jq -r ".\"$2\" | if type == \"array\" then .[] else . end" <<<"$1")
-    if [ -n "$op" ] && [ "$op" != "null" ]; then
-        echo "$op"
-    else
-        return 1
-    fi
+    local op quote_placeholder=$'\001'
+	op=$(jq -r ".\"${2}\" | values" <<<"$1")
+	if [ "$op" ]; then
+		op="${op#"${op%%[![:space:]]*}"}"
+		op="${op%"${op##*[![:space:]]}"}"
+		op=${op//\\\'/$quote_placeholder}
+		op=${op//"''"/$quote_placeholder}
+		op=${op//"'"/'"'}
+		op=${op//$quote_placeholder/$'\''}
+		echo "$op"
+	else return 1; fi
 }
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
@@ -51,13 +54,10 @@ java() { env -i java --enable-native-access=ALL-UNNAMED "$@"; }
 
 get_prebuilts() {
 	local cli_src=$1 cli_ver=$2 patches_src=$3 patches_ver=$4
-	# 增加调试输出，确认传入的源到底是谁
-	pr "正在获取预构建文件: $patches_src" >&2
-	
-	# 使用完整的仓库名作为文件夹名，防止 crimera 和 MorpheApp 撞车
-	local owner_repo=${patches_src//\//_}
-	local cl_dir="${TEMP_DIR}/${owner_repo,,}-rv"
-	[ -d "$cl_dir" ] || mkdir -p "$cl_dir"
+	pr "Getting prebuilts (${patches_src%/*})" >&2
+	local cl_dir=${patches_src%/*}
+	cl_dir=${TEMP_DIR}/${cl_dir,,}-rv
+	[ -d "$cl_dir" ] || mkdir "$cl_dir"
 
 	for src_ver in "$cli_src CLI $cli_ver cli" "$patches_src Patches $patches_ver patches"; do
 		set -- $src_ver
@@ -130,39 +130,20 @@ get_prebuilts() {
 		if [ "$tag" = "Patches" ]; then
 			if [ "$grab_cl" = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi			
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
-				pr "正在解压补丁包进行手术..." >&2
 				local extensions_ext
-				# 增加检测：看看到底有没有 shared 文件
-				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" 2>/dev/null | grep -o "shared\..*" | head -1) || :
-				extensions_ext="${extensions_ext#*.}"
-
-				if [ -z "$extensions_ext" ]; then
-					wpr "跳过：在 .mpp 中找不到 extensions/shared.*"
-				else
-					if ! (
-						mkdir -p "${file}-zip"
-						# 必须加 -o 强制覆盖，防止卡住等待用户输入
-						unzip -qo "${file}" -d "${file}-zip" || exit 1
-						
-						pr "正在修正集成包路径..." >&2
-						# 注意：这里直接用 /usr/bin/java 或者确认 java 路径可用
-						if ! timeout 60 /usr/bin/java -Xmx512M -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main \
-							"${file}-zip/extensions/shared.${extensions_ext}" \
-							"${file}-zip/extensions/shared-patched.${extensions_ext}"; then
-						    epr "Java 修正超时或失败，正在跳过并尝试维持原样..."
-							rm -f "${file}-zip/extensions/shared-patched.${extensions_ext}"
-						else
-						    mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}"
-						fi
-						
-						rm -f "${file}"
-						cd "${file}-zip"
-						zip -0rq "${CWD}/${file}" . || exit 1
-					) >&2; then
-						epr "集成包补丁过程出错，已跳过以防止卡死"
-					fi
+				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*") extensions_ext="${extensions_ext#*.}"
+				if ! (
+					mkdir -p "${file}-zip" || return 1
+					unzip -qo "${file}" -d "${file}-zip" || return 1
+					java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main "${file}-zip/extensions/shared.${extensions_ext}" "${file}-zip/extensions/shared-patched.${extensions_ext}" || return 1
+					mv -f "${file}-zip/extensions/shared-patched.${extensions_ext}" "${file}-zip/extensions/shared.${extensions_ext}" || return 1
+					rm "${file}" || return 1
+					cd "${file}-zip" || abort
+					zip -0rq "${CWD}/${file}" . || return 1
+				) >&2; then
+					echo >&2 "Patching revanced-integrations failed"
 				fi
-				rm -rf "${file}-zip" || :
+				rm -r "${file}-zip" || :
 			fi
 		fi
 		echo -n "$file "
@@ -535,14 +516,10 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 # --------------------------------------------------
 
 patch_apk() {
-    local stock_input="$1"
-    local patched_apk="$2"
-    local patcher_args="$3"
-    local cli_jar="$4"
-    local patches_jar="$5"
+    local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
 	
 	# 在命令中加入 --continue-on-error
-	local cmd="java -jar \"$cli_jar\" patch --patches \"$patches_jar\" \"$stock_input\" -o \"$patched_apk\" \
+	local cmd="java -jar '$cli_jar' patch --patches '$patches_jar' '$stock_input' -o '$patched_apk' 
 --continue-on-error \
 --keystore ks.keystore --keystore-password 123456789 --keystore-entry-password 123456789 \
 --keystore-entry-alias jhc --signer jhc $patcher_args"
@@ -758,18 +735,9 @@ build_rv() {
 	done
 }
 
-list_args() { 
-    # 现在输入已经是纯净的行了，直接去掉可能残余的引号即可
-    echo "$1" | sed 's/^"//;s/"$//' | grep -v '^$' || :
-}
+list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
+join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
 
-join_args() { 
-    # 逻辑：循环读取每一个补丁名，给它套上转义的双引号
-    list_args "$1" | while read -r line; do
-        # 核心：确保补丁名里的双引号被转义，然后两端加上双引号防护
-        echo -n "${2} \"${line//\"/\\\"}\" "
-    done
-}
 module_config() {
 	local ma=""
 	if [ "$4" = "arm64-v8a" ]; then
