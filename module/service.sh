@@ -24,8 +24,8 @@ run() {
 	sleep 4
 
 	BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
-	if [ ! -d "$BASEPATH/lib" ]; then
-		err "mount failed. Dont report this, consider using rvmm-zygisk-mount"
+	if [ ! -f "$BASEPATH/base.apk" ]; then
+		err "找不到系统的 base.apk，挂载失败"
 		return
 	fi
 	VERSION=$(dumpsys package "$PKG_NAME" 2>&1 | grep -m1 versionName) VERSION="${VERSION#*=}"
