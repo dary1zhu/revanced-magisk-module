@@ -163,7 +163,7 @@ fi
 am force-stop "$PKG_NAME"
 ui_print "* Optimizing $PKG_NAME"
 
-cmd package compile -m speed -f "$PKG_NAME"
+cmd package compile -m speed-profile -f "$PKG_NAME"
 # nohup cmd package compile -m speed-profile -f "$PKG_NAME" >/dev/null 2>&1
 
 if [ "$KSU" ]; then
