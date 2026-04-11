@@ -58,8 +58,8 @@ app-name = "YouTube Music"
 pkg-name = "com.google.android.apps.youtube.music"
 build-mode = "both"
 arch = "arm64-v8a"
-version = "9.13.50"
+version = "9.14.51"
 include-stock = true
 # 填入你下载好的 YTMusic 合并版地址
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.apps.youtube.music-v9.13.50.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.apps.youtube.music-v9.14.51.apk"
 module-prop-name = "morphe-youtubemusic"
