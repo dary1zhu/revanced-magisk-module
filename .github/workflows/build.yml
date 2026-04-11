@@ -43,7 +43,7 @@ jobs:
           PIKO_TAG=$(gh release list -R crimera/piko --limit 1 | awk -F '\t' '{print $3}')
           [ -z "$PIKO_TAG" ] && PIKO_TAG="v0.0.1-dev"
           
-          # 2. 获取 Morphe 的最新 Tag (用于 YouTube/Music)
+          # 2. 获取 Morphe 的最新 Tag (用于 YouTube/Music/Reddit)
           MORPHE_TAG=$(gh release list -R MorpheApp/morphe-patches --limit 1 | awk -F '\t' '{print $3}')
           [ -z "$MORPHE_TAG" ] && MORPHE_TAG="v0.0.1-dev"
 
@@ -104,11 +104,15 @@ jobs:
           cd build || { echo "build folder not found"; exit 1; }
           for OUTPUT in *module*.zip; do
             [ "$OUTPUT" = "*module*.zip" ] && continue
-            ZIP_S=$(unzip -p "$OUTPUT" module.prop)
+            
+            # 【在这里改】在提取内容时，直接把回车符删掉
+            ZIP_S=$(unzip -p "$OUTPUT" module.prop | tr -d '\r')
+            
             if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then continue; fi
             UPDATE_JSON="${UPDATE_JSON##*/}"
             VER=$(echo "$ZIP_S" | grep version=)
             VER="${VER##*=}"
+            
             DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
           done
