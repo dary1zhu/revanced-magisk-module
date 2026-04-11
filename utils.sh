@@ -224,7 +224,7 @@ _req() {
 		fi
 	fi
 	# 修改点：去掉 -s，增加 -L# (显示进度条) 和增加超时时间
-	if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" \
+	if ! curl -LR -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" \
 		--connect-timeout 30 --retry 5 --fail -# "$@" "$ip" -o "$dlp"; then
 		epr "Request failed: $ip"
 		return 1
@@ -727,7 +727,7 @@ build_rv() {
 
 		local module_output="${app_name_l}-${rv_brand_f}-module-v${version_f}-${arch_f}.zip"
 		
-		if [[ "$pkg_name" == "com.instagram.android" ]]; then
+		if [[ "$pkg_name" == "com.instagram.android" || "$pkg_name" == "com.reddit.frontpage" ]]; then
 			pr "检测到 Instagram，启动‘全量合体’打包模式..."
 			# 1. 强制使用补丁版（fat APK）作为 base.apk
 			# 此时的 $patched_apk 必须是你在 build 阶段用 is_root=false 生成的
