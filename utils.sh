@@ -77,8 +77,11 @@ get_prebuilts() {
 		if [ "$ver" = "dev" ]; then
 			local resp
 			resp=$(gh_req "$rv_rel" -) || return 1
-			ver=$(jq -e -r '.[] | .tag_name' <<<"$resp" | get_highest_ver) || return 1
-		fi
+			# 删掉 get_highest_ver，直接取数组的第一项 (.[0]) 的 tag_name
+            # GitHub 的 API 已经帮你把最顶部的 Release 排在第一个了
+            ver=$(jq -e -r '.[0].tag_name' <<<"$resp") || return 1
+            pr "自动获取最新 Release 标签: $ver"
+        fi
 		if [ "$ver" = "latest" ]; then
 			rv_rel+="/latest"
 			name_ver="*"
