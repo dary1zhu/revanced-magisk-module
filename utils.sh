@@ -738,7 +738,10 @@ build_rv() {
 			
 			# 2. 关键：删掉模块里的“挂载登记”文件
 			# 因为代码已经合进 base.apk 了，我们不需要另一个 apk 来混淆系统
-			rm -f "${base_template}/${pkg_name}.apk" 2>/dev/null || :
+			if [ "${args[include_stock]}" = true ]; then
+                pr "保留原版 APK 以供提取原生库..."
+                cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"
+            fi
 			
 			# 3. 如果你的模块脚本（service.sh）会自动寻找这个包，我们放一个空文件或者干脆不放
 			pr "已将全量代码合入 base.apk，移除多余的挂载包。"
