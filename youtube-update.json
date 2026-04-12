@@ -1,6 +1,6 @@
 {
   "version": "v21.15.282 (patches dev.5.mpp)",
-  "versionCode": 66,
+  "versionCode": 67,
   "zipUrl": "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Piko-v3.2.0-Morphe-v1.24.0-dev.5/youtube-morphe-module-v21.15.282-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/dary1zhu/revanced-magisk-module/update/build.md"
 }
