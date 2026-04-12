@@ -15,9 +15,9 @@ app-name = "Instagram"
 pkg-name = "com.instagram.android"
 build-mode = "both"
 arch = "arm64-v8a"
-version = "425.0.0.0.0"
+version = "423.0.0.47.66"
 include-stock = true
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.instagram.android-v425.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.instagram.android-v423.apk"
 module-prop-name = "piko-instagram"
 
 [Reddit]
