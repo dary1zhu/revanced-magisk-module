@@ -56,17 +56,6 @@ jobs:
           echo "NEXT_VER_CODE=${COMBINED_TAG}" >> $GITHUB_OUTPUT
           echo "INT_VER_CODE=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: Debug Morphe CLI Help
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p temp/morpheapp-rv
-          # 使用 gh 命令行工具下载最新的 Morphe CLI
-          gh release download -R MorpheApp/morphe-cli --pattern "*all.jar" --dir temp/morpheapp-rv
-          # 输出帮助信息到日志
-          echo "=== Morphe CLI Help Output ==="
-          java -jar temp/morpheapp-rv/*all.jar patch --help
-
       - name: Build modules/APKs
         run: if [ -f "config.json" ]; then ./build.sh config.json; else ./build.sh config.toml; fi
         env:
