@@ -1,7 +1,7 @@
-Instagram: 425.0.0.0.0  
 Reddit: 2026.15.0  
-YouTube: 21.15.282  
+Instagram: 423.0.0.47.66  
 YouTube-Music: 9.14.51  
+YouTube: 21.15.282  
 
 Install [GmsCore](https://github.com/ReVanced/GmsCore/releases) for non-root APKs  
 Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules from Play Store  
