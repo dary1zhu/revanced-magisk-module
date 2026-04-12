@@ -730,28 +730,32 @@ build_rv() {
 
 		local module_output="${app_name_l}-${rv_brand_f}-module-v${version_f}-${arch_f}.zip"
 		
-		if [[ "$pkg_name" == "com.instagram.android" || "$pkg_name" == "com.reddit.frontpage" ]]; then
-			pr "检测到 Instagram，启动‘全量合体’打包模式..."
-			# 1. 强制使用补丁版（fat APK）作为 base.apk
-			# 此时的 $patched_apk 必须是你在 build 阶段用 is_root=false 生成的
-			cp -f "$patched_apk" "${base_template}/base.apk"
-			
-			# 2. 关键：删掉模块里的“挂载登记”文件
-			# 因为代码已经合进 base.apk 了，我们不需要另一个 apk 来混淆系统
-			if [ "${args[include_stock]}" = true ]; then
-                pr "保留原版 APK 以供提取原生库..."
+		if [[ "$pkg_name" == "com.instagram.android" ]]; then
+            pr "检测到 Instagram，执行‘极致精简’全量合体打包..."
+            
+            # 1. 强制使用补丁版（fat APK）作为 base.apk
+            # 这样代码直接合入 classes.dex，避开 Android 17 的 ClassLoader 隔离
+            cp -f "$patched_apk" "${base_template}/base.apk"
+            
+            # 2. 极致精简：删除模块里的原版 APK 和登记文件
+            # 这样模块体积最小，只保留打好补丁的 base.apk
+            rm -f "${base_template}/${pkg_name}.apk" 2>/dev/null || :
+            
+            pr "Instagram 模式：已移除原版 APK，仅保留全量补丁 base.apk。"
+
+        else
+            # Reddit、YouTube 和 YouTube Music 都会跑进这里
+            # 采用传统的挂载/登记模式
+            pr "检测到 $pkg_name，采用标准挂载模式打包..."
+            
+            cp -f "$patched_apk" "${base_template}/base.apk"
+            
+            # 如果配置里 include_stock = true，则保留原版 APK
+            if [ "${args[include_stock]}" = true ]; then
+                pr "正在为 $pkg_name 放入原版 APK 以供系统校验和提取库文件..."
                 cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"
             fi
-			
-			# 3. 如果你的模块脚本（service.sh）会自动寻找这个包，我们放一个空文件或者干脆不放
-			pr "已将全量代码合入 base.apk，移除多余的挂载包。"
-		else
-			# YouTube 等其他应用维持原样
-			cp -f "$patched_apk" "${base_template}/base.apk"
-			if [ "${args[include_stock]}" = true ]; then
-				cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"
-			fi
-		fi
+        fi
 		# --- 逻辑结束 ---
 
 		pr "正在压制模块: ${table}"
