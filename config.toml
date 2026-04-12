@@ -17,7 +17,7 @@ build-mode = "both"
 arch = "arm64-v8a"
 version = "423.0.0.47.66"
 include-stock = true
-excluded-patches = ["Change-version-code"]
+excluded-patches = ["Change version code"]
 direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.instagram.android-v423.apk"
 module-prop-name = "piko-instagram"
 
