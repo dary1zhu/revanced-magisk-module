@@ -15,14 +15,14 @@ app-name = "Instagram"
 pkg-name = "com.instagram.android"
 build-mode = "both"
 arch = "arm64-v8a"
-version = "423.0.0.47.66"
+version = "424.0.0.49.64"
 include-stock = true
 excluded-patches = ["Change version code"]
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.instagram.android-v423.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.instagram.android-v424.apk"
 module-prop-name = "piko-instagram"
 
 [Reddit]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -37,7 +37,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-reddit"
 
 [YouTube]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -51,7 +51,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-youtube"
 
 [YouTube-Music]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
