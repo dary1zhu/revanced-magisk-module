@@ -7,7 +7,7 @@ cli-version = "dev"
 cli-source = "MorpheApp/morphe-cli"
 
 [Instagram]
-enabled = true
+enabled = false
 rv-brand = "Piko"
 patches-source = "crimera/piko"
 patches-version = "dev"
@@ -22,7 +22,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "piko-instagram"
 
 [Reddit]
-enabled = false
+enabled = true
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -37,7 +37,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-reddit"
 
 [YouTube]
-enabled = false
+enabled = true
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -51,7 +51,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-youtube"
 
 [YouTube-Music]
-enabled = false
+enabled = true
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
