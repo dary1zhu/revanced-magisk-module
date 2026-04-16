@@ -37,7 +37,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-reddit"
 
 [YouTube]
-enabled = false
+enabled = true
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
