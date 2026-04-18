@@ -1,5 +1,4 @@
 Reddit: 2026.16.0  
-YouTube: 21.16.240  
 
 Install [GmsCore](https://github.com/ReVanced/GmsCore/releases) for non-root APKs  
 Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules from Play Store  
@@ -8,6 +7,4 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules fro
   
 CLI: MorpheApp/morphe-cli-1.8.0-dev.3-all.jar  
 Patches: MorpheApp/patches-1.24.0-dev.11.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.24.0-dev.11)
-
-CLI: MorpheApp/morphe-cli-1.8.0-dev.3-all.jar    
+[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.24.0-dev.11)  
