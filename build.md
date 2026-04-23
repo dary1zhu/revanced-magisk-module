@@ -1,3 +1,4 @@
+Reddit: 2026.16.0  
 YouTube-Music: 9.15.50  
 YouTube: 21.16.240  
 
@@ -7,7 +8,8 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules fro
 [Morphe-Magisk-Build](https://github.com/dary1zhu/revanced-magisk-module)
   
 CLI: MorpheApp/morphe-cli-1.8.0-dev.6-all.jar  
-Patches: MorpheApp/patches-1.24.0.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.24.0)
+Patches: MorpheApp/patches-1.25.0-dev.1.mpp  
+[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.25.0-dev.1)
 
+CLI: MorpheApp/morphe-cli-1.8.0-dev.6-all.jar  
 CLI: MorpheApp/morphe-cli-1.8.0-dev.6-all.jar    
