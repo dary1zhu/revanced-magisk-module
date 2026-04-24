@@ -22,7 +22,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "piko-instagram"
 
 [Reddit]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -45,13 +45,13 @@ app-name = "YouTube"
 pkg-name = "com.google.android.youtube"
 build-mode = "both"
 arch = "arm64-v8a"
-version = "21.16.240" 
+version = "21.17.480" 
 include-stock = true
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.youtube-v21.16.240.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.youtube-21.17.480.apk"
 module-prop-name = "morphe-youtube"
 
 [YouTube-Music]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
