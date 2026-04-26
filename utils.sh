@@ -534,20 +534,20 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 # --------------------------------------------------
 
 patch_apk() {
-	local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
-	local unique_temp="temp-dir-$(basename "$patched_apk" .apk)"
-	
-	local cmd="java -Xmx2g -jar '$cli_jar' patch '$stock_input' \
-		-t '$unique_temp' \
-		--purge \
-		-o '$patched_apk' \
-		-p '$patches_jar' \
-		--keystore=ks-p12.keystore \
-		--keystore-password=123456789 \
-		--keystore-entry-password=123456789 \
-		--keystore-entry-alias=jhc \
-		--signer=Morphe \
-		--continue-on-error $patcher_args"
+    local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
+    local unique_temp="temp-dir-$(basename "$patched_apk" .apk)"
+    
+    local cmd="java -Xmx2g -jar '$cli_jar' patch '$stock_input' \
+        -t '$unique_temp' \
+        --purge \
+        -o '$patched_apk' \
+        -p '$patches_jar' \
+        --keystore=ks-p12.keystore \
+        --keystore-type=PKCS12 \
+        --keystore-password=123456789 \
+        --keystore-entry-password=123456789 \
+        --keystore-entry-alias=jhc \
+        --continue-on-error $patcher_args"
 	# TODO: remove this later
 	local cli_name
 	cli_name=$(basename "$cli_jar")
