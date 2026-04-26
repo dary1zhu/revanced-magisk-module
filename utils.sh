@@ -535,15 +535,20 @@ get_direct_resp() { __DIRECT_APKNAME__=$(awk -F/ '{print $NF}' <<<"$1"); }
 
 patch_apk() {
     local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jar=$5
+    
+    # 隔离目录逻辑保持不变
     local unique_temp="temp-dir-$(basename "$patched_apk" .apk)"
     
+    # 核心修复点：
+    # 1. 换回 ks.keystore（这是 BKS 格式，Morphe 的最爱）
+    # 2. 删掉那个不被支持的 --keystore-type
+    # 3. 密码保持 123456789，别名保持 jhc
     local cmd="java -Xmx2g -jar '$cli_jar' patch '$stock_input' \
         -t '$unique_temp' \
         --purge \
         -o '$patched_apk' \
         -p '$patches_jar' \
-        --keystore=ks-p12.keystore \
-        --keystore-type=PKCS12 \
+        --keystore=ks.keystore \
         --keystore-password=123456789 \
         --keystore-entry-password=123456789 \
         --keystore-entry-alias=jhc \
