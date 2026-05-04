@@ -7,9 +7,9 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules fro
 
 [Morphe-Magisk-Build](https://github.com/dary1zhu/revanced-magisk-module)
   
-CLI: MorpheApp/morphe-cli-1.8.0-dev.10-all.jar  
-Patches: MorpheApp/patches-1.26.0-dev.1.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.26.0-dev.1)
+CLI: MorpheApp/morphe-cli-1.8.0-all.jar  
+Patches: MorpheApp/patches-1.26.0-dev.2.mpp  
+[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.26.0-dev.2)
 
-CLI: MorpheApp/morphe-cli-1.8.0-dev.10-all.jar  
-CLI: MorpheApp/morphe-cli-1.8.0-dev.10-all.jar    
+CLI: MorpheApp/morphe-cli-1.8.0-all.jar  
+CLI: MorpheApp/morphe-cli-1.8.0-all.jar    
