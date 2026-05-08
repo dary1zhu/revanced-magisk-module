@@ -22,7 +22,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "piko-instagram"
 
 [Reddit]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -51,7 +51,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-youtube"
 
 [YouTube-Music]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
