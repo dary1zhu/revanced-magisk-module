@@ -45,9 +45,9 @@ app-name = "YouTube"
 pkg-name = "com.google.android.youtube"
 build-mode = "both"
 arch = "arm64-v8a"
-version = "21.19.280" 
+version = "21.20.400" 
 include-stock = true
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.youtube-v21.19.280.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.youtube-v21.20.400.apk"
 module-prop-name = "morphe-youtube"
 
 [YouTube-Music]
