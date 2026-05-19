@@ -30,10 +30,10 @@ app-name = "Reddit"
 pkg-name = "com.reddit.frontpage"
 build-mode = "both"
 arch = "arm64-v8a"
-version = "2026.19.0"  # 请根据你要下载的 APK 版本修改
+version = "2026.20.0"  # 请根据你要下载的 APK 版本修改
 include-stock = true
 # 建议先去下载好对应的原版 APK 传到你的 Prebuilts 仓库
-direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.reddit.frontpage-v2026.19.0.apk"
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.reddit.frontpage-v2026.20.0.apk"
 module-prop-name = "morphe-reddit"
 
 [YouTube]
