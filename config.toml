@@ -22,7 +22,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "piko-instagram"
 
 [Reddit]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -37,7 +37,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-reddit"
 
 [YouTube]
-enabled = true
+enabled =false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -51,7 +51,7 @@ direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/down
 module-prop-name = "morphe-youtube"
 
 [YouTube-Music]
-enabled = true
+enabled = false
 rv-brand = "Morphe"
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "dev"
@@ -64,3 +64,17 @@ include-stock = true
 # 填入你下载好的 YTMusic 合并版地址
 direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.apps.youtube.music-v9.18.50.apk"
 module-prop-name = "morphe-youtubemusic"
+
+[GooglePhotos]
+enabled = true
+rv-brand = "De-ReVanced"
+patches-source = "RookieEnough/De-ReVanced"
+patches-version = "dev"
+app-name = "Google Photos"
+pkg-name = "com.google.android.apps.photos"
+build-mode = "both"
+arch = "arm64-v8a"
+version = "7.77.0.916869048"
+include-stock = true
+direct-dlurl = "https://github.com/dary1zhu/revanced-magisk-module/releases/download/Prebuilts/com.google.android.apps.photos-v7.77.0.916869048.apk"
+module-prop-name = "de-revanced-gphotos"
