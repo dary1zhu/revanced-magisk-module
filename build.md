@@ -7,4 +7,4 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules fro
   
 CLI: MorpheApp/morphe-cli-1.9.0-dev.2-all.jar  
 Patches: RookieEnough/patches-1.0.4.mpp  
-[Changelog](https://github.com/RookieEnough/De-ReVanced/releases/tag/v1.0.4)  
+[Changelog](https://github.com/RookieEnough/De-Vanced/releases/tag/v1.0.4)  
