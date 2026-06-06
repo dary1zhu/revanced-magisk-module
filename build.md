@@ -1,5 +1,5 @@
-YouTube-Music: 9.22.53  
-YouTube: 21.22.164  
+GooglePhotos: 7.79.0.924379438  
+YouTube: 21.23.480  
 
 Install [GmsCore](https://github.com/ReVanced/GmsCore/releases) for non-root APKs  
 Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules from Play Store  
@@ -7,7 +7,9 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach modules fro
 [Morphe-Magisk-Build](https://github.com/dary1zhu/revanced-magisk-module)
   
 CLI: MorpheApp/morphe-cli-1.9.1-dev.3-all.jar  
-Patches: MorpheApp/patches-1.31.0-dev.6.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.31.0-dev.6)
+Patches: MorpheApp/patches-1.31.0-dev.7.mpp  
+[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.31.0-dev.7)
 
-CLI: MorpheApp/morphe-cli-1.9.1-dev.3-all.jar    
+CLI: MorpheApp/morphe-cli-1.9.1-dev.3-all.jar  
+Patches: RookieEnough/patches-1.0.4.mpp  
+[Changelog](https://github.com/RookieEnough/De-Vanced/releases/tag/v1.0.4)  
